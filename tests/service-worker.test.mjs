@@ -13,7 +13,11 @@ function setup() {
   const stored = { enabled: true, allowlistedSites: [] };
   let dynamic = [];
   let lastRuleset = null;
+  let enabledRulesets = ["starter_rules"];
+  let dynamicUpdateCount = 0;
+  let staticUpdateCount = 0;
   let onMessage = null;
+  let onInstalled = null;
   const chrome = {
     storage: {
       local: {
@@ -23,14 +27,20 @@ function setup() {
       onChanged: { addListener() {} }
     },
     declarativeNetRequest: {
-      async updateEnabledRulesets(value) { lastRuleset = value; },
+      async getEnabledRulesets() { return [...enabledRulesets]; },
+      async updateEnabledRulesets(value) {
+        staticUpdateCount++;
+        lastRuleset = value;
+        enabledRulesets = [...new Set(enabledRulesets.filter((x) => !value.disableRulesetIds.includes(x)).concat(value.enableRulesetIds))];
+      },
       async getDynamicRules() { return dynamic; },
       async updateDynamicRules({ removeRuleIds, addRules }) {
+        dynamicUpdateCount++;
         dynamic = dynamic.filter((rule) => !removeRuleIds.includes(rule.id)).concat(addRules);
       }
     },
     runtime: {
-      onInstalled: { addListener() {} },
+      onInstalled: { addListener(callback) { onInstalled = callback; } },
       onStartup: { addListener() {} },
       onMessage: { addListener(callback) { onMessage = callback; } }
     }
@@ -46,18 +56,21 @@ function setup() {
         assert.equal(retainedChannel, true);
       });
     },
+    async install() { onInstalled(); await this.send({ type: "GET_STATUS" }); },
+    seedDynamic(rules) { dynamic = JSON.parse(JSON.stringify(rules)); },
     snapshot() {
-      return { stored: { ...stored }, dynamic: JSON.parse(JSON.stringify(dynamic)), lastRuleset: JSON.parse(JSON.stringify(lastRuleset)) };
+      return { stored: { ...stored }, dynamic: JSON.parse(JSON.stringify(dynamic)), lastRuleset: JSON.parse(JSON.stringify(lastRuleset)), enabledRulesets: JSON.parse(JSON.stringify(enabledRulesets)), staticUpdateCount, dynamicUpdateCount };
     }
   };
 }
 
-test("initial state enables bundled rules", async () => {
+test("status reads do not rewrite installed rules", async () => {
   const app = setup();
   const result = await app.send({ type: "GET_STATUS" });
   assert.equal(result.ok, true);
   assert.equal(result.state.enabled, true);
-  assert.deepEqual(app.snapshot().lastRuleset.enableRulesetIds, ["starter_rules"]);
+  assert.equal(app.snapshot().staticUpdateCount, 0);
+  assert.equal(app.snapshot().dynamicUpdateCount, 0);
 });
 
 test("site exceptions create and remove allowAllRequests DNR rules", async () => {
@@ -77,6 +90,7 @@ test("pause disables static rules and restores them on resume", async () => {
   assert.deepEqual(app.snapshot().lastRuleset.disableRulesetIds, ["starter_rules"]);
   await app.send({ type: "SET_ENABLED", enabled: true });
   assert.deepEqual(app.snapshot().lastRuleset.enableRulesetIds, ["starter_rules"]);
+  assert.equal(app.snapshot().staticUpdateCount, 2);
 });
 
 test("rejects invalid site and invalid global toggle types", async () => {
@@ -85,4 +99,51 @@ test("rejects invalid site and invalid global toggle types", async () => {
   assert.equal(invalidSite.ok, false);
   const invalidToggle = await app.send({ type: "SET_ENABLED", enabled: "false" });
   assert.equal(invalidToggle.ok, false);
+});
+
+test("repeated settings avoid unnecessary DNR mutation", async () => {
+  const app = setup();
+  await app.send({ type: "SET_ENABLED", enabled: true });
+  await app.send({ type: "SET_ENABLED", enabled: true });
+  assert.equal(app.snapshot().staticUpdateCount, 0);
+  assert.equal(app.snapshot().dynamicUpdateCount, 0);
+
+  await app.send({ type: "SET_SITE_ALLOWED", site: "example.com", allowed: true });
+  assert.equal(app.snapshot().dynamicUpdateCount, 1);
+  await app.send({ type: "SET_SITE_ALLOWED", site: "example.com", allowed: true });
+  await app.send({ type: "GET_STATUS" });
+  assert.equal(app.snapshot().dynamicUpdateCount, 1);
+});
+
+test("sync replaces managed rules with stale extra conditions and preserves unrelated rules", async () => {
+  const app = setup();
+  await app.send({ type: "SET_SITE_ALLOWED", site: "example.com", allowed: true });
+  const expected = app.snapshot().dynamic[0];
+  const unrelated = { ...expected, id: 42 };
+  app.seedDynamic([
+    unrelated,
+    { ...expected, condition: { ...expected.condition, excludedRequestDomains: ["example.com"] } }
+  ]);
+
+  await app.send({ type: "SET_ENABLED", enabled: true });
+  assert.deepEqual(app.snapshot().dynamic, [unrelated, expected]);
+  assert.equal(app.snapshot().dynamicUpdateCount, 2, "Stale conditions must be repaired");
+});
+
+test("semantically identical managed rules do not churn when Chrome reorders properties or lists", async () => {
+  const app = setup();
+  await app.send({ type: "SET_SITE_ALLOWED", site: "example.com", allowed: true });
+  const expected = app.snapshot().dynamic[0];
+  app.seedDynamic([{
+    condition: {
+      resourceTypes: [...expected.condition.resourceTypes].reverse(),
+      requestDomains: expected.condition.requestDomains
+    },
+    action: expected.action,
+    priority: expected.priority,
+    id: expected.id
+  }]);
+
+  await app.send({ type: "SET_ENABLED", enabled: true });
+  assert.equal(app.snapshot().dynamicUpdateCount, 1, "Equivalent rules should not be rewritten");
 });
