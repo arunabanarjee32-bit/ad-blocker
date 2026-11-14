@@ -1,6 +1,6 @@
 # Ad Blocker — Chrome MV3 Development Preview
 
-> **Version 0.1.0 · Early implementation · 15 November 2026**  
+> **Version 0.1.0 · Early implementation · 15 November 2026**
 > A small, original-code browser extension foundation now exists. **Its synthetic Chromium integration suite passes, but it is not production ready.** Full AdGuard/uBlock/Ghostery feature parity is a long-term goal, not a current claim.
 
 ## Vision
