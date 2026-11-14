@@ -44,7 +44,10 @@
   async function change(messageData) {
     if (pending) return;
     pending = true;
-    render();
+    // Preserve the clicked value while blocking additional edits until saved.
+    enabledInput.disabled = true;
+    siteInput.disabled = true;
+    message("Saving…");
     try {
       currentState = await request(messageData);
       render();
