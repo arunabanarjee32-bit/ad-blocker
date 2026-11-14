@@ -1,6 +1,6 @@
 # Master implementation checklist — strictly ordered
 
-**Updated:** 13 Nov 2026. **Target:** compete credibly with leading ad blockers through measurable, privacy-first reliability.
+**Updated:** 15 Nov 2026 (Asia/Kolkata). **Target:** compete credibly with leading ad blockers through measurable, privacy-first reliability.
 
 **Status key:** [x] = documentation or source artifact present; [ ] = still pending/requires verification. The presence of source code is **not** a claim that it passed Chromium tests. See [FEATURE_MATRIX](FEATURE_MATRIX.md). Do not skip licensing/security gates before shipping.
 
@@ -28,12 +28,14 @@
 - [x] **017** Add Node-native unit/structural tests and build script, without downloading dependencies.
 - [x] **018** Add GitHub Actions validation workflow and packaged-build artifact creation.
 - [x] **019** Run automated CI successfully on the exact merged commit; fix any failing tests. **Evidence:** [GitHub Actions run 43469964379](https://github.com/rejoansardar23/ad-blocker/actions/runs/43469964379) on commit `4a069f6638fd801e091cddf270ebadb8b65abf55` (unit tests, structural checks, build and artifact upload passed).
-- [ ] **020** Install unpacked output in real Chromium/Chrome and verify manifest and permissions.
-- [ ] **021** Confirm blocked and allowed network requests with a controlled synthetic website.
-- [ ] **022** Test global pause/resume, per-site exceptions, reload and Chrome restart.
-- [ ] **023** Verify cosmetic hiding and legitimate UI on multiple fixture pages.
+- [x] **020** Load packaged output in real Chromium and inspect the manifest permission set (`declarativeNetRequest`, `storage`, `activeTab`; HTTP(S) cosmetic content scripts). Verified in headless Chromium 158.0.8127.18; manual store/install review remains in 024–025.
+- [x] **021** Confirm blocked and allowed network requests with a controlled synthetic website.
+- [x] **022** Test global pause/resume, per-site exceptions, reload and Chrome restart.
+- [x] **023** Verify cosmetic hiding and legitimate UI on multiple fixture pages.
 - [ ] **024** Run accessibility, permission and security reviews and fix blockers.
 - [ ] **025** Create a developer-installable alpha ZIP with tested install instructions.
+
+**Browser evidence for 020–023:** [merged destination PR #1](https://github.com/renoukhan39-bit/ad-blocker/pull/1), [merged destination PR #2](https://github.com/renoukhan39-bit/ad-blocker/pull/2), and [combined CI run 43647171852](https://github.com/renoukhan39-bit/ad-blocker/actions/runs/43647171852): `npm ci`, 14 Node tests, build, 10 Chromium fixture cases. Includes exact blocking failures/server counts, trusted subdomains and unrelated-domain rejection, pause/exception persistence across restarts, and preservation of page-owned content. Node v22.23.4, Playwright 1.65.0, Chromium 158.0.8127.18. [Post-merge CI for PR #1](https://github.com/renoukhan39-bit/ad-blocker/actions/runs/43647078763) passed on `85e761b4f9bc15de88cacb37816ba9527abb2bde`. No real-site breadth, full accessibility/security audit, or alpha ZIP is claimed.
 
 **Stage 1 evidence gate:** all of 019–025 pass, with browser version, commands, failure logs and manual verification captured. Do **not** describe the extension as a finished competitor before this gate.
 
@@ -84,12 +86,12 @@
 - [ ] **059** Study mobile platform constraints and privacy requirements.
 - [ ] **060** Review business models and ongoing operating costs before broad launch.
 
-## Immediate next actions for Codex Cloud
+## Immediate next actions
 
-1. Run `npm run check` and `npm run build` using Node.js 20+ on this repository; inspect and fix failures.
-2. Download CI build, load `dist/chrome` through `chrome://extensions` → Developer Mode → Load unpacked.
-3. Create a local browser-fixture integration test and record actual DNR block/allow results, pause, per-site reload and cosmetic behavior.
-4. Do license and dependency audits before importing external software. No GPL source copies into an intended proprietary implementation.
-5. Reconcile milestone status, then begin Stage 2's list/compiler research.
+1. Follow [the dependency queue](PR_EXECUTION_QUEUE.md) and finish the pinned reuse/license audit without importing unapproved sources.
+2. Obtain the owner's distribution/license choice before closing Stage 0 gates.
+3. Complete settings consistency and MV3 security regressions, including concurrent writes, API failure recovery, and worker suspension.
+4. Preserve `npm ci` and full Chromium validation on every behavior change.
+5. Complete accessibility, manual installation and alpha packaging before closing 024–025.
 
-**Important:** The current release is a *small proof-of-concept* with a handful of blocked domains. It does not deliver full AdGuard/uBlock parity, video ad removal or comprehensive tracker filtering.
+**Important:** This remains a small starter blocker, not full AdGuard/uBlock parity, comprehensive tracker filtering, or guaranteed video ad removal.
