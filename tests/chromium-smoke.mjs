@@ -32,6 +32,7 @@ const server = createServer((request, response) => {
   response.end('<!doctype html><html><body>'+
     '<div id="ad-box" data-ad-blocker-test="ad">Advertising element</div>'+
     '<div id="real-content">Legitimate website content</div>'+
+    '<div id="ad-blocker-cosmetic">Page-owned element with a coincidental ID</div>'+
     '<img id="ad-pixel" alt="ad fixture"><img id="benign-pixel" alt="control fixture">'+
     '<script>'+
     'for (const [id, uri] of [['+
@@ -79,12 +80,14 @@ async function checkPage(page, { adLoaded, cosmeticHidden, host = "publisher.tes
       ad: document.querySelector("#ad-pixel").dataset.result,
       benign: document.querySelector("#benign-pixel").dataset.result,
       cosmeticHidden: getComputedStyle(document.querySelector("#ad-box")).display === "none",
-      realContentVisible: getComputedStyle(document.querySelector("#real-content")).display !== "none"
+      realContentVisible: getComputedStyle(document.querySelector("#real-content")).display !== "none",
+      pageOwnedElementPresent: !!document.getElementById("ad-blocker-cosmetic")
     }));
     assert.equal(actual.benign, "loaded", "Control image must reach publisher.test: " + JSON.stringify(actual));
     assert.equal(actual.ad, adLoaded ? "loaded" : "error", "Unexpected DNR result: " + JSON.stringify(actual));
     assert.equal(actual.cosmeticHidden, cosmeticHidden, "Cosmetic CSS unexpectedly changed: " + JSON.stringify(actual));
     assert.equal(actual.realContentVisible, true, "Legitimate page content must remain visible");
+    assert.equal(actual.pageOwnedElementPresent, true, "Cosmetic toggles must preserve page-owned nodes");
     assert.equal(counts.ad - before.ad, adLoaded ? 1 : 0, "Check server receipt for every case");
     assert.equal(counts.benign - before.benign, 1, "The control must always reach the server");
     if (!adLoaded) assert.ok(failures.includes("net::ERR_BLOCKED_BY_CLIENT"), "Only an explicit blocking failure counts as DNR evidence");
@@ -141,6 +144,7 @@ try {
 
   await setEnabled(options, false);
   await website.waitForFunction(() => getComputedStyle(document.querySelector("#ad-box")).display !== "none");
+  assert.equal(await website.locator("#ad-blocker-cosmetic").count(), 1, "Pause must not remove page-owned content before navigation");
   await checkPage(website, { adLoaded: true, cosmeticHidden: false });
   assert.ok(counts.ad > 0, "Paused extension should allow the fake ad fixture");
 
