@@ -54,28 +54,44 @@ const launch = () => chromium.launchPersistentContext(profile, {
   args: [
     "--disable-extensions-except=" + extensionPath,
     "--load-extension=" + extensionPath,
-    "--host-resolver-rules=MAP publisher.test 127.0.0.1, MAP ads.adblocker.test 127.0.0.1",
+    "--host-resolver-rules=MAP publisher.test 127.0.0.1, MAP *.publisher.test 127.0.0.1, MAP notpublisher.test 127.0.0.1, MAP ads.adblocker.test 127.0.0.1",
     "--no-proxy-server"
   ]
 });
 
-async function checkPage(page, { adLoaded, cosmeticHidden }) {
-  await page.goto("http://publisher.test:" + port + "/", { waitUntil: "domcontentloaded" });
-  await page.waitForFunction(() =>
-    !!document.querySelector("#ad-pixel")?.dataset.result &&
-    !!document.querySelector("#benign-pixel")?.dataset.result
-  , null, { timeout: 15000 });
-  const actual = await page.evaluate(() => ({
-    ad: document.querySelector("#ad-pixel").dataset.result,
-    benign: document.querySelector("#benign-pixel").dataset.result,
-    cosmeticHidden: getComputedStyle(document.querySelector("#ad-box")).display === "none",
-    realContentVisible: getComputedStyle(document.querySelector("#real-content")).display !== "none"
-  }));
-  assert.equal(actual.benign, "loaded", "Control image must reach publisher.test: " + JSON.stringify(actual));
-  assert.equal(actual.ad, adLoaded ? "loaded" : "error", "Unexpected DNR result: " + JSON.stringify(actual));
-  assert.equal(actual.cosmeticHidden, cosmeticHidden, "Cosmetic CSS unexpectedly changed: " + JSON.stringify(actual));
-  assert.equal(actual.realContentVisible, true, "Legitimate page content must remain visible");
-  console.log("Browser case passed:", JSON.stringify({ adLoaded, cosmeticHidden, actual }));
+async function checkPage(page, { adLoaded, cosmeticHidden, host = "publisher.test" }) {
+  const before = { ...counts };
+  const failures = [];
+  const recordFailure = (request) => {
+    if (new URL(request.url()).hostname === "ads.adblocker.test") failures.push(request.failure()?.errorText);
+  };
+  page.on("requestfailed", recordFailure);
+  try {
+    await page.goto("http://" + host + ":" + port + "/", { waitUntil: "domcontentloaded" });
+    await page.waitForFunction(() =>
+      !!document.querySelector("#ad-pixel")?.dataset.result &&
+      !!document.querySelector("#benign-pixel")?.dataset.result
+    , null, { timeout: 15000 });
+    await page.waitForFunction((hidden) =>
+      (getComputedStyle(document.querySelector("#ad-box")).display === "none") === hidden
+    , cosmeticHidden, { timeout: 15000 });
+    const actual = await page.evaluate(() => ({
+      ad: document.querySelector("#ad-pixel").dataset.result,
+      benign: document.querySelector("#benign-pixel").dataset.result,
+      cosmeticHidden: getComputedStyle(document.querySelector("#ad-box")).display === "none",
+      realContentVisible: getComputedStyle(document.querySelector("#real-content")).display !== "none"
+    }));
+    assert.equal(actual.benign, "loaded", "Control image must reach publisher.test: " + JSON.stringify(actual));
+    assert.equal(actual.ad, adLoaded ? "loaded" : "error", "Unexpected DNR result: " + JSON.stringify(actual));
+    assert.equal(actual.cosmeticHidden, cosmeticHidden, "Cosmetic CSS unexpectedly changed: " + JSON.stringify(actual));
+    assert.equal(actual.realContentVisible, true, "Legitimate page content must remain visible");
+    assert.equal(counts.ad - before.ad, adLoaded ? 1 : 0, "Check server receipt for every case");
+    assert.equal(counts.benign - before.benign, 1, "The control must always reach the server");
+    if (!adLoaded) assert.ok(failures.includes("net::ERR_BLOCKED_BY_CLIENT"), "Only an explicit blocking failure counts as DNR evidence");
+    console.log("Browser case passed:", JSON.stringify({ host, adLoaded, cosmeticHidden, actual }));
+  } finally {
+    page.off("requestfailed", recordFailure);
+  }
 }
 
 async function setEnabled(options, enabled) {
@@ -108,6 +124,7 @@ try {
   });
   port = server.address().port;
   context = await launch();
+  console.log("Browser environment:", JSON.stringify({ node: process.version, chromium: context.browser().version() }));
   const worker = context.serviceWorkers()[0] || await context.waitForEvent("serviceworker", { timeout: 20000 });
   const extensionId = new URL(worker.url()).host;
   assert.ok(extensionId, "Extension service worker must start");
@@ -123,12 +140,15 @@ try {
   assert.equal(counts.ad, 0, "Blocked ad fixture should never hit local server");
 
   await setEnabled(options, false);
+  await website.waitForFunction(() => getComputedStyle(document.querySelector("#ad-box")).display !== "none");
   await checkPage(website, { adLoaded: true, cosmeticHidden: false });
   assert.ok(counts.ad > 0, "Paused extension should allow the fake ad fixture");
 
   await setEnabled(options, true);
   await setTrusted(options, "publisher.test", true);
   await checkPage(website, { adLoaded: true, cosmeticHidden: false });
+  await checkPage(website, { host: "news.publisher.test", adLoaded: true, cosmeticHidden: false });
+  await checkPage(website, { host: "notpublisher.test", adLoaded: false, cosmeticHidden: true });
   await setTrusted(options, "publisher.test", false);
   await checkPage(website, { adLoaded: false, cosmeticHidden: true });
 
@@ -143,6 +163,22 @@ try {
   await restored.locator("#status").filter({ hasText: "Settings loaded." }).waitFor();
   assert.equal(await restored.locator("#enabled").isChecked(), true);
   assert.equal(await restored.locator("#sites li").filter({ hasText: "publisher.test" }).count(), 1);
+  const afterRestart = await context.newPage();
+  await checkPage(afterRestart, { adLoaded: true, cosmeticHidden: false });
+  await setTrusted(restored, "publisher.test", false);
+  await checkPage(afterRestart, { adLoaded: false, cosmeticHidden: true });
+  await setEnabled(restored, false);
+  await context.close();
+  context = await launch();
+  const pausedWorker = context.serviceWorkers()[0] || await context.waitForEvent("serviceworker", { timeout: 20000 });
+  const pausedOptions = await context.newPage();
+  await pausedOptions.goto("chrome-extension://" + new URL(pausedWorker.url()).host + "/options/options.html");
+  await pausedOptions.locator("#status").filter({ hasText: "Settings loaded." }).waitFor();
+  assert.equal(await pausedOptions.locator("#enabled").isChecked(), false, "Global pause must survive restart");
+  const pausedWebsite = await context.newPage();
+  await checkPage(pausedWebsite, { adLoaded: true, cosmeticHidden: false });
+  await setEnabled(pausedOptions, true);
+  await checkPage(pausedWebsite, { adLoaded: false, cosmeticHidden: true });
   console.log("All Chromium MV3 smoke tests passed; ad/control request counts:", counts);
 } finally {
   if (context) await context.close().catch(() => {});
