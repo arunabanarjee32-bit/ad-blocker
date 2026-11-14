@@ -1,7 +1,7 @@
 # Ad Blocker — Chrome MV3 Development Preview
 
-> **Version 0.1.0 · Early implementation · 13 November 2026**  
-> A small, original-code browser extension foundation now exists. **It has not yet passed recorded live Chrome/Chromium end-to-end tests and is not production ready.** Full AdGuard/uBlock/Ghostery feature parity is a long-term goal, not a current claim.
+> **Version 0.1.0 · Early implementation · 15 November 2026**
+> A small, original-code browser extension foundation now exists. **Its synthetic Chromium integration suite passes, but it is not production ready.** Full AdGuard/uBlock/Ghostery feature parity is a long-term goal, not a current claim.
 
 ## Vision
 
@@ -13,14 +13,14 @@ Build a market-competitive, independently branded, privacy-first ad-blocking sof
 
 | Capability | Code state | Required proof |
 |---|---|---|
-| Chrome Manifest V3 package | Added | Load in Chrome |
-| Bundled sample blocking rules (few ad networks) | Added | Real browser request fixture |
-| Global protection toggle | Added | Browser + restart |
-| Per-site trusted website list | Added | Browser reload and subdomain scenarios |
-| Basic cosmetic CSS | Added | Safe hiding/no false positives |
-| Popup, options and local settings | Added | Chrome UI interaction |
+| Chrome Manifest V3 package | Chromium fixture verified | Manual install/store review remains |
+| Bundled sample blocking rules (few ad networks) | Chromium fixture verified | Limited starter domains only |
+| Global protection toggle | Chromium fixture verified | Options control and paused restart pass |
+| Per-site trusted website list | Chromium fixture verified | Reload, subdomains, unrelated domains, restart pass |
+| Basic cosmetic CSS | Chromium fixture verified | Fixture safety only; broader compatibility pending |
+| Popup, options and local settings | Partly verified | Options in Chromium; popup Node tests; toolbar/accessibility review pending |
 | Node unit tests and structural checks | CI verified | [Passing GitHub Actions run](https://github.com/rejoansardar23/ad-blocker/actions/runs/43469964379) |
-| Dependency-free extension packaging | CI verified | GitHub Actions artifact; Chrome load still unverified |
+| Dependency-free extension packaging | CI verified | GitHub Actions artifact; synthetic Chromium load verified |
 | Comprehensive filter-list support, tracker modes, custom rules, element picker | Not yet built | Milestones P1 |
 | Chrome Store release, Chrome/Firefox/desktop/DNS products | Not yet built | Separate approval/testing |
 
@@ -28,14 +28,14 @@ This is a **starter ruleset**, not a market-leading blocker yet. No telemetry or
 
 ## Verified CI build
 
-The [successful validation/build run](https://github.com/rejoansardar23/ad-blocker/actions/runs/43469964379) ran structural checks, Node unit tests and the package build and uploaded the `ad-blocker-chrome-unpacked` artifact. It has **not** proved live Chrome filtering, reload behavior or website compatibility.
+The [successful validation/build run](https://github.com/rejoansardar23/ad-blocker/actions/runs/43469964379) ran structural checks, Node unit tests and the package build and uploaded the `ad-blocker-chrome-unpacked` artifact. The later [combined Chromium run](https://github.com/renoukhan39-bit/ad-blocker/actions/runs/43647171852) passed 14 Node tests and 10 synthetic filtering/reload/restart cases on Chromium 158.0.8127.18. This establishes fixture mechanics, not general website compatibility.
 
 ## Quick start
 
-Requires **Node.js 20+** and Chrome/Chromium 121+ for testing.
+Requires **Node.js 22+** and Chrome/Chromium 121+ for testing.
 
 ```bash
-git clone https://github.com/rejoansardar23/ad-blocker.git
+git clone https://github.com/renoukhan39-bit/ad-blocker.git
 cd ad-blocker
 npm run check
 npm run build
@@ -43,7 +43,7 @@ npm run build
 
 Open `chrome://extensions` → enable **Developer mode** → **Load unpacked** → select `dist/chrome`.
 
-**There is no need to run `npm install`:** these scripts use built-in Node APIs and the extension contains no third-party runtime packages. The Chrome/browser smoke tests are still a pending verification gate. See [developer setup](docs/DEVELOPER_SETUP.md).
+Unit checks and packaging use built-in Node APIs. For the browser suite, run `npm ci --no-audit --no-fund`, `npx playwright install --with-deps chromium`, then `npm run test:e2e`. The extension contains no third-party runtime packages. See [Chromium test guide](docs/CHROMIUM_TEST_GUIDE.md) and [developer setup](docs/DEVELOPER_SETUP.md).
 
 ## Documentation map
 
@@ -67,12 +67,8 @@ We propose **one main modular product repo**, not a blind merge of several GPL c
 
 **Ownership/license warning:** the repo is public, but a project-wide source license is not yet selected. The founder must decide licensing/distribution and external contribution terms before a public release or major third-party code import. Original code ownership does not imply ownership of upstream components.
 
-## Next milestone (Codex Cloud)
+## Next milestone
 
-1. Run `npm run check` and `npm run build`; capture CI evidence and fix failures.
-2. Load build in real Chrome and test DNR block/allow and pause/allowlist/restore cases.
-3. Perform security and permission review; record results in the checklist.
-4. Audit compatible existing engines and filter data before rebuilding more features.
-5. Only then expand toward a competitive filter compiler and coverage benchmark.
+Follow the [reviewed dependency queue](docs/PR_EXECUTION_QUEUE.md). Complete the pinned reuse/license audit and owner distribution decision, then eligible settings/security work before importing filter engines or data. Finish accessibility and manual installation gates. Keep the full Node and Chromium suite green for each implementation PR.
 
-**The goal is real working software, not a feature checklist without evidence.**
+**The goal is real working software with evidence.**

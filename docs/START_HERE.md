@@ -1,6 +1,6 @@
 # Start here — no chat history required
 
-This repository holds a first **original-code Chrome MV3 development preview** and a longer-term plan for a market-competitive ad blocker. It is not a finished or independently browser-validated product.
+This repository holds a first **original-code Chrome MV3 development preview** and a longer-term plan for a market-competitive ad blocker. It is not a finished product. Synthetic Chromium integration tests are recorded in CI; broad site compatibility remains unverified.
 
 ## First 10 minutes
 
@@ -23,7 +23,7 @@ An independent, privacy-first ad blocker competing on **measured** network filte
 - Node-native tests, validation/build scripts and GitHub Actions workflow.
 - Comprehensive project strategy and new-developer documentation.
 
-**Not yet verified:** Chrome/Chromium installation, real network-blocking behavior, UI behavior in a browser, performance and compatibility. **Not yet built:** comprehensive filter lists, auto-updates, advanced custom rules/element picker, production release.
+**Verified in synthetic Chromium fixtures:** package load, network blocking/allowing, options controls, trust boundaries, reversible cosmetics and restart persistence. **Not yet verified:** broad performance/compatibility, manual alpha installation, complete toolbar popup and accessibility review. **Not yet built:** comprehensive filter lists, auto-updates, advanced custom rules/element picker, production release.
 
 ## Product decisions
 
@@ -36,6 +36,6 @@ An independent, privacy-first ad blocker competing on **measured** network filte
 
 ## First contribution
 
-Run the current checks, make the first Chromium fixture test pass, audit the license/permissions, and record the result in the [checklist](IMPLEMENTATION_CHECKLIST.md). For the next features, insist on a reuse audit instead of a rewrite.
+Run the current checks and Chromium suite, follow the dependency queue, audit the license/permissions, and record verified results in the [checklist](IMPLEMENTATION_CHECKLIST.md). For the next features, insist on a reuse audit instead of a rewrite.
 
 For the long-term scope see [Vision](VISION.md), [Product Spec](PRODUCT_SPEC.md), [Roadmap](ROADMAP.md), [Competitor benchmarks](COMPETITIVE_BENCHMARK.md), [Codex Workflow](CODEX_WORKFLOW.md), and [Decision Log](DECISIONS.md).

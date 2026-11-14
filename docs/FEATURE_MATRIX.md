@@ -1,19 +1,19 @@
 # Features — planned versus implemented
 
-**Updated 13 Nov 2026.** **Implemented in source** is different from **browser verified**. No current release is certified ready. Status must be updated with test evidence.
+**Updated 15 Nov 2026 (Asia/Kolkata).** **Implemented in source** is different from **browser verified**. No current release is certified ready. Status must be updated with test evidence.
 
 | Capability | Priority | Status | Evidence / required follow-up |
 |---|---|---|---|
-| MV3 manifest and installable folder layout | P0 | Source present | `manifest.json`, build script; test Chrome |
-| Bundled small DNR network rules | P0 | Source present | `rules/starter.json`; browser fixture needed |
-| Global protection toggle | P0 | Source present | service worker + popup; browser persistence needed |
-| Per-site allowlist using frame rules | P0 | Source present | DNR allowAllRequests; browser reload behavior needed |
-| Narrow cosmetic hiding | P0 | Source present | content CSS; verify no site breakage |
-| Popup and options controls | P0 | Source present | browser functional review needed |
+| MV3 manifest and installable folder layout | P0 | Chromium fixture verified | Packaged extension and service worker load in Chromium 158 |
+| Bundled small DNR network rules | P0 | Chromium fixture verified | Explicit blocked-request errors and server receipt counts; limited starter coverage |
+| Global protection toggle | P0 | Chromium fixture verified | Options pause/resume and paused restart; popup save behavior has Node regressions |
+| Per-site allowlist using frame rules | P0 | Chromium fixture verified | Reload, subdomain boundaries, removal and restart |
+| Narrow cosmetic hiding | P0 | Chromium fixture verified | Reversible CSS and page-owned node collision tests; broad site compatibility remains open |
+| Popup and options controls | P0 | Partly verified | Browser options controls and Node pending/error tests; actual toolbar popup and accessibility review remain open |
 | Local preferences, no explicit telemetry | P0 | Source present | privacy review and outbound-traffic check |
 | Node unit, structural checks and build | P0 | CI verified | [Passing run](https://github.com/rejoansardar23/ad-blocker/actions/runs/43469964379) on commit `4a069f6` |
-| CI build artifact | P0 | CI verified | GitHub Actions uploaded `ad-blocker-chrome-unpacked`; browser install still unverified |
-| Real Chromium integration tests | P0 | Planned | browser fixture |
+| CI build artifact | P0 | CI verified | GitHub Actions artifact; automated Chromium loading verified; manual alpha installation pending |
+| Real Chromium integration tests | P0 | CI verified | 10 synthetic cases using locked Playwright 1.65.0 |
 | Complete site compatibility and accessibility review | P0 | Planned | multiple pages, screen reader |
 | Imported license-reviewed filter sources | P1 | Planned | provenance and attribution |
 | Full filter-list compilation and quota management | P1 | Planned | benchmark vs existing parsers |
@@ -28,6 +28,8 @@
 | Video ad best-effort experiments | P2 | Planned | browser restrictions; no guarantees |
 | Edge and Firefox | P2 | Planned | separate adapter and browser tests |
 | Desktop, DNS and mobile | P2 | Research only | separate architectures, products and threat models |
+
+Current evidence: [merged PR #1](https://github.com/renoukhan39-bit/ad-blocker/pull/1), [merged PR #2](https://github.com/renoukhan39-bit/ad-blocker/pull/2), [14 Node tests and 10 Chromium cases](https://github.com/renoukhan39-bit/ad-blocker/actions/runs/43647171852). See [Chromium guide](CHROMIUM_TEST_GUIDE.md) for commands and environment limits.
 
 See [full ordered implementation checklist](IMPLEMENTATION_CHECKLIST.md) and [Product Spec](PRODUCT_SPEC.md).
 
