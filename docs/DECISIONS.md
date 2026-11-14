@@ -52,7 +52,13 @@ The repository is public and has no project-wide license. Owner aims to control 
 
 No feature marked shipped without code, tests and release evidence. No invented blocking statistics, “number one”, 100% YouTube or universal ad removal claims.
 
-## ADR template
+## D-007 — Retain the verified original runtime while auditing reuse
+
+**State:** proposed, 15 Nov 2026; owner license/distribution decision unresolved.
+
+The [pinned foundation audit](FOUNDATION_AUDIT.md) recommends KEEP for the existing original runtime during development. The Chromium baseline now passes; replacing it has no measured advantage yet. Very Good AdBlock's top-level MIT source coexists with generated filter data labelled GPL in its notices. Unblock expands permissions substantially. Ghostery's MPL core needs a specific MV3 benefit and full dependency review. No candidate or filter dataset is approved for import and no product license is selected. Continue original-code reliability fixes; defer imports until the audit and owner decision are complete.
+
+## ADR template (new decisions)
 
 ### D-XXX — Title
 - Date:
