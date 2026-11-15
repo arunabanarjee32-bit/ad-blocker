@@ -1,6 +1,6 @@
 # Testing and release evidence (current + planned)
 
-**State:** Node-native structural checks, unit tests and a build script are present; GitHub Actions is configured. **No live Chrome/Chromium integration test has yet been recorded.** Current implementation is a development preview.
+**State:** Node-native structural checks, unit tests and a build script are present; GitHub Actions is configured. **Synthetic Chromium integration tests now run in CI; broad real-site compatibility remains unverified.** Current implementation is a development preview.
 
 ## Commands
 
@@ -9,9 +9,10 @@ npm run verify   # JSON/manifest/files and JS syntax checks
 npm run test     # Node unit tests for domain logic and mock service worker
 npm run check    # both of the above
 npm run build    # validate then copy unpacked extension to dist/chrome
+npm run test:e2e # real Chromium synthetic request/cosmetic/restart fixtures
 ```
 
-Node.js 20+ required. No `npm install` necessary for present scripts.
+Node.js 22+ required. `npm ci --no-audit --no-fund` installs lockfile-pinned Playwright for the browser tests. Run `npx playwright install chromium`, then `npm run test:e2e`.
 
 ## What the existing tests measure
 
@@ -22,9 +23,9 @@ Node.js 20+ required. No `npm install` necessary for present scripts.
 
 Mock-based unit tests **do not** prove Chrome rules work in a browser or that real websites are safe.
 
-## Next verification gate (required)
+## Additional verification gates (required for alpha release)
 
-1. Load `dist/chrome` into a pinned Chrome/Chromium build 121+; record actual browser version.
+1. Repeat the pinned Chromium synthetic suite on the final integration commit and record actual browser version; manually load `dist/chrome` in stable Chrome for UX smoke tests.
 2. Use a synthetic HTTP(S) test site and a reserved `.test` ad hostname, track request errors before/after enabled flag.
 3. Test trusted top-level site reload and confirm no blocked subrequests when allowAllRequests matches.
 4. Test removal of trust and blocking restoration after reload.

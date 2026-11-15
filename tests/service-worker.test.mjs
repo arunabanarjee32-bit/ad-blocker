@@ -57,6 +57,7 @@ function setup() {
       });
     },
     async install() { onInstalled(); await this.send({ type: "GET_STATUS" }); },
+    seedDynamic(rules) { dynamic = JSON.parse(JSON.stringify(rules)); },
     snapshot() {
       return { stored: { ...stored }, dynamic: JSON.parse(JSON.stringify(dynamic)), lastRuleset: JSON.parse(JSON.stringify(lastRuleset)), enabledRulesets: JSON.parse(JSON.stringify(enabledRulesets)), staticUpdateCount, dynamicUpdateCount };
     }
@@ -112,4 +113,37 @@ test("repeated settings avoid unnecessary DNR mutation", async () => {
   await app.send({ type: "SET_SITE_ALLOWED", site: "example.com", allowed: true });
   await app.send({ type: "GET_STATUS" });
   assert.equal(app.snapshot().dynamicUpdateCount, 1);
+});
+
+test("sync replaces managed rules with stale extra conditions and preserves unrelated rules", async () => {
+  const app = setup();
+  await app.send({ type: "SET_SITE_ALLOWED", site: "example.com", allowed: true });
+  const expected = app.snapshot().dynamic[0];
+  const unrelated = { ...expected, id: 42 };
+  app.seedDynamic([
+    unrelated,
+    { ...expected, condition: { ...expected.condition, excludedRequestDomains: ["example.com"] } }
+  ]);
+
+  await app.send({ type: "SET_ENABLED", enabled: true });
+  assert.deepEqual(app.snapshot().dynamic, [unrelated, expected]);
+  assert.equal(app.snapshot().dynamicUpdateCount, 2, "Stale conditions must be repaired");
+});
+
+test("semantically identical managed rules do not churn when Chrome reorders properties or lists", async () => {
+  const app = setup();
+  await app.send({ type: "SET_SITE_ALLOWED", site: "example.com", allowed: true });
+  const expected = app.snapshot().dynamic[0];
+  app.seedDynamic([{
+    condition: {
+      resourceTypes: [...expected.condition.resourceTypes].reverse(),
+      requestDomains: expected.condition.requestDomains
+    },
+    action: expected.action,
+    priority: expected.priority,
+    id: expected.id
+  }]);
+
+  await app.send({ type: "SET_ENABLED", enabled: true });
+  assert.equal(app.snapshot().dynamicUpdateCount, 1, "Equivalent rules should not be rewritten");
 });

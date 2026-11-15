@@ -1,10 +1,10 @@
 # Developer setup — development preview
 
-**State:** basic original MV3 source code exists as of 13 Nov 2026. No external runtime or build dependencies. Chrome/browser end-to-end validation is not yet recorded.
+**State:** original MV3 development preview; no external runtime dependencies. Synthetic Chrome/Chromium end-to-end validation has passed in CI, but the manual product/production quality gate remains open.
 
 ## Prerequisites
 
-- Node.js **20 or newer** (Node.js 22 recommended for CI parity).
+- Node.js **22 or newer**.
 - Chrome / Chromium version 121+ to test a Manifest V3 extension.
 - Git and a shell. No paid hosting, domain or API keys required.
 
@@ -17,7 +17,7 @@ npm run check
 npm run build
 ```
 
-`npm run check` validates the manifest, file references, DNR JSON, JavaScript syntax and Node unit tests. `npm run build` copies only the extension runtime to `dist/chrome`. No `npm install` is required for these commands.
+`npm run check` validates the manifest, file references, DNR JSON, JavaScript syntax and Node unit tests. `npm run build` copies only the extension runtime to `dist/chrome`. No npm installation is required for the two Node-native validation/build commands. The Chromium end-to-end suite uses pinned Playwright development dependencies; run `npm ci --no-audit --no-fund`, `npx playwright install chromium`, and `npm run test:e2e`.
 
 ## Install in Chrome
 
@@ -38,7 +38,11 @@ Chrome may display broad site-access notices because cosmetic content scripts ma
 - A narrow cosmetic CSS rule for common ad placeholders, disabled on trusted sites.
 - Local options interface to add/remove trusted websites.
 
-**Verification warning:** the list above describes implemented code paths, not yet independently proven browser success. Use the [implementation checklist](IMPLEMENTATION_CHECKLIST.md) and [testing strategy](TESTING.md).
+**Verification warning:** these scenarios are verified on synthetic Chromium fixtures in CI, not comprehensively on real websites. Use the [implementation checklist](IMPLEMENTATION_CHECKLIST.md) and [testing strategy](TESTING.md).
+
+## Browser smoke-test evidence and next manual verification
+
+Automated fixture tests: [Chromium test guide](CHROMIUM_TEST_GUIDE.md). Complete independent manual installation and accessibility review before labelling the preview releasable.
 
 ## Browser smoke test to record
 

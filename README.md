@@ -1,6 +1,6 @@
 # Ad Blocker — Chrome MV3 Development Preview
 
-> **Version 0.1.0 · Early implementation · 13 November 2026**  
+> **Version 0.1.0 · Development preview · 15 November 2026**  
 > A small, original-code browser extension foundation now exists. **The synthetic Playwright Chromium MV3 test suite has passed, but broad real-world browser compatibility and production readiness are NOT verified.** Full AdGuard/uBlock/Ghostery feature parity is a long-term goal, not a current claim.
 
 ## Vision
@@ -18,9 +18,9 @@ Build a market-competitive, independently branded, privacy-first ad-blocking sof
 | Global protection toggle | Synthetic Chromium CI verified | More browser/profile compatibility tests later |
 | Per-site trusted website list | Chromium CI verified on fixture | Subdomain/real-site variations need more tests |
 | Basic cosmetic CSS | Fixture CI verified | Broad false-positive testing still required |
-| Popup, options and local settings | Added | Chrome UI interaction |
+| Popup, options and local settings | Options + Node UI regression tests | Manual toolbar popup and accessibility checks pending |
 | Node unit tests and structural checks | CI verified | [Passing GitHub Actions run](https://github.com/rejoansardar23/ad-blocker/actions/runs/43469964379) |
-| Dependency-free extension packaging | CI verified | GitHub Actions artifact; Chrome load still unverified |
+| Runtime dependency-free extension packaging | CI verified | Synthetic Chromium load verified; manual installation remains |
 | Comprehensive filter-list support, tracker modes, custom rules, element picker | Not yet built | Milestones P1 |
 | Chrome Store release, Chrome/Firefox/desktop/DNS products | Not yet built | Separate approval/testing |
 
@@ -32,7 +32,7 @@ The [successful validation/build run](https://github.com/rejoansardar23/ad-block
 
 ## Quick start
 
-Requires **Node.js 20+** and Chrome/Chromium 121+ for testing.
+Requires **Node.js 22+** and Chrome/Chromium 121+ for testing.
 
 ```bash
 git clone https://github.com/rejoansardar23/ad-blocker.git
@@ -43,7 +43,7 @@ npm run build
 
 Open `chrome://extensions` → enable **Developer mode** → **Load unpacked** → select `dist/chrome`.
 
-**There is no need to run `npm install`:** these scripts use built-in Node APIs and the extension contains no third-party runtime packages. The Chrome/browser smoke tests are still a pending verification gate. See [developer setup](docs/DEVELOPER_SETUP.md).
+**The extension runtime has no third-party packages.** Run `npm ci --no-audit --no-fund` and `npx playwright install chromium` to execute the real Chromium suite with `npm run test:e2e`. See [developer setup](docs/DEVELOPER_SETUP.md).
 
 ## Documentation map
 
@@ -54,6 +54,7 @@ Open `chrome://extensions` → enable **Developer mode** → **Load unpacked** �
 - [ARCHITECTURE.md](docs/ARCHITECTURE.md) — existing request/permission design and future modules.
 - [ROADMAP.md](docs/ROADMAP.md) — phase delivery and exit gates.
 - [REUSE_AND_LICENSES.md](docs/REUSE_AND_LICENSES.md) / [REUSE_AUDIT_TEMPLATE.md](docs/REUSE_AUDIT_TEMPLATE.md) — public repository evaluation before integration.
+- **[FOUNDATION_AUDIT.md](docs/FOUNDATION_AUDIT.md)** — preliminary pinned audit of existing engine and selected candidates.
 - **[OPEN_SOURCE_REFERENCE_REPOS.txt](docs/OPEN_SOURCE_REFERENCE_REPOS.txt)** — complete list of previously suggested public repositories to study.
 - [TESTING.md](docs/TESTING.md) / [COMPETITIVE_BENCHMARK.md](docs/COMPETITIVE_BENCHMARK.md) — quality proof and competitor benchmarking.
 - [SECURITY_PRIVACY.md](docs/SECURITY_PRIVACY.md) / [SECURITY.md](SECURITY.md) — security, privacy and vulnerability disclosures.
@@ -68,12 +69,15 @@ We propose **one main modular product repo**, not a blind merge of several GPL c
 
 **Ownership/license warning:** the repo is public, but a project-wide source license is not yet selected. The founder must decide licensing/distribution and external contribution terms before a public release or major third-party code import. Original code ownership does not imply ownership of upstream components.
 
+## Fork integration and independent research
+
+The fork [renoukhan39-bit/ad-blocker](https://github.com/renoukhan39-bit/ad-blocker) contributed stronger synthetic browser regressions, additional settings UI tests, a more complete DNR comparison, and CI dependency SBOM/auditing. Both commit histories are preserved through the integration; no third-party filter engine or dataset is imported. The 18-repository research list remains in [OPEN_SOURCE_REFERENCE_REPOS.txt](docs/OPEN_SOURCE_REFERENCE_REPOS.txt). Original product licensing remains undecided.
+
 ## Next milestone (Codex Cloud)
 
-1. Run `npm run check` and `npm run build`; capture CI evidence and fix failures.
-2. Load build in real Chrome and test DNR block/allow and pause/allowlist/restore cases.
-3. Perform security and permission review; record results in the checklist.
-4. Audit compatible existing engines and filter data before rebuilding more features.
-5. Only then expand toward a competitive filter compiler and coverage benchmark.
+1. Run `npm ci --no-audit --no-fund`, `npm run check`, `npm run build` and `npm run test:e2e`; verify the exact integration PR CI.
+2. Complete the owner-controlled project licensing decision and pinned dependency/filter data research.
+3. Perform security, permissions, accessibility and manual Chrome installation reviews; record results in the checklist.
+4. Expand filter compilation and coverage only after legal reuse evaluation and actual browser tests.
 
 **The goal is real working software, not a feature checklist without evidence.**

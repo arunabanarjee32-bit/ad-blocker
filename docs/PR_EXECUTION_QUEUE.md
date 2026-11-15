@@ -13,6 +13,10 @@ The [public repository study catalog](OPEN_SOURCE_REFERENCE_REPOS.txt) collects 
 
 PR #3 and #4 have been merged after green checks. Continue with the owner-controlled license audit and remaining issues. Future PRs must not bypass required checks, security reviews or licensing gates.
 
+## Reconciled fork work
+
+The original upstream PRs #3, #4 and #17 were merged on 15 November 2026. A separate fork, `renoukhan39-bit/ad-blocker`, independently implemented additional Chromium test cases, UI state/error regression tests, canonical DNR rule comparison, a preliminary pinned foundation audit, and CI dependency audit/SBOM generation. An upstream integration branch resolves the divergence by retaining **both** the original catalog and these improvements. Fork-specific instructions asserting that upstream is read-only or requiring that all work occur in the fork do **not** apply to this repository. The codebase's project-wide source license remains undecided. No external GPL source/data is imported.
+
 ## Complete work in this order
 
 | Order | Issue | Dependency | Deliverable |
@@ -48,7 +52,7 @@ Every PR should:
 ## Codex review/merge protocol
 
 1. Open the **oldest eligible PR**, read its diff, issue and this plan.
-2. Run `npm run check` and `npm run build`, then `npm run test:e2e` when PR #3's Chromium test tooling exists. Install dependencies and browser as documented.
+2. Run `npm ci --no-audit --no-fund`, `npm run check`, `npm run build`, and `npm run test:e2e` using the pinned Chromium tooling, with exact CI evidence.
 3. Diagnose and fix failures on the PR branch (or propose review changes), re-run CI and check browser regressions.
 4. Review security, licensing, source attribution and data collection effects.
 5. **Merge only when checks and scope acceptance pass** and the maintainer has approved any unresolved licensing/release choice.

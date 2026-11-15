@@ -32,6 +32,22 @@ function siteRule(site, index) {
   };
 }
 
+// Compare the complete rule so stale restrictions are repaired. Chrome may
+// return object keys and set-valued conditions in a different order.
+function ruleSignature(rules) {
+  function canonical(value, key = "") {
+    if (Array.isArray(value)) {
+      const items = value.map((item) => canonical(item));
+      return ["requestDomains", "resourceTypes"].includes(key) ? items.sort() : items;
+    }
+    if (value && typeof value === "object") {
+      return Object.fromEntries(Object.keys(value).sort().map((name) => [name, canonical(value[name], name)]));
+    }
+    return value;
+  }
+  return JSON.stringify(canonical(rules));
+}
+
 async function syncFromStorage() {
   const { enabled, allowlistedSites } = await getState();
   if (allowlistedSites.length > MAX_SITES) {
@@ -55,12 +71,7 @@ async function syncFromStorage() {
     .filter((rule) => rule.id >= FIRST_SITE_RULE_ID && rule.id < FIRST_SITE_RULE_ID + MAX_SITES)
     .sort((a, b) => a.id - b.id);
   const desired = enabled ? allowlistedSites.map(siteRule) : [];
-  const signature = (rules) => rules.map((rule) => [
-    rule.id, rule.priority, rule.action.type,
-    (rule.condition.requestDomains || []).join(","),
-    (rule.condition.resourceTypes || []).join(",")
-  ].join("|")).join(";");
-  if (signature(managed) !== signature(desired)) {
+  if (ruleSignature(managed) !== ruleSignature(desired)) {
     await chrome.declarativeNetRequest.updateDynamicRules({
       removeRuleIds: managed.map((rule) => rule.id),
       addRules: desired

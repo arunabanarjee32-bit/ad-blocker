@@ -5,7 +5,8 @@ Read [the ordered execution queue](../docs/PR_EXECUTION_QUEUE.md), [AGENTS.md](.
 ## Completed and validated
 - PR #3: Chromium MV3 smoke test plus tested Playwright dependency lockfile, merged 15 Nov 2026. Validation: https://github.com/rejoansardar23/ad-blocker/actions/runs/43709953216
 - PR #4: idempotent DNR updates and safe cosmetic stylesheet handling, updated to include PR #3 and merged 15 Nov 2026. Validation: https://github.com/rejoansardar23/ad-blocker/actions/runs/43710088283
-- PR #17: this documentation + reference catalog, still subject to review/merge until GitHub reports it merged.
+- PR #17: original project documentation and 18-repository research catalog, merged 15 Nov 2026.
+- Fork `renoukhan39-bit/ad-blocker`: additional CI security checks and synthetic regressions, integrated via reviewed conflict-resolution branch. Validate integration CI before merge.
 
 ## Next task
 
@@ -21,4 +22,4 @@ After #2, follow the issue sequence in `docs/PR_EXECUTION_QUEUE.md`. For each re
 
 ## Codex prompt
 
-> Continue the connected `rejoansardar23/ad-blocker` repository from the latest main branch. PRs #3 and #4 are merged and tested. Read AGENTS.md, docs/PR_EXECUTION_QUEUE.md, docs/OPEN_SOURCE_REFERENCE_REPOS.txt, and docs/REUSE_AND_LICENSES.md. Start with Issue #2's pinned reuse and licensing audit, do not reimplement an existing solution without justification, and do not change product licensing or distribute unapproved code. Proceed through the implementation issues one tested PR at a time, always reporting commands/results and any owner decision needed.
+> Continue the connected `rejoansardar23/ad-blocker` repository from the latest main branch. PRs #3 and #4 are merged and tested. Read AGENTS.md, docs/PR_EXECUTION_QUEUE.md, docs/OPEN_SOURCE_REFERENCE_REPOS.txt, and docs/REUSE_AND_LICENSES.md. Reconcile the partial pinned reuse audit with Issue #2's unresolved owner licensing choice, do not reimplement an existing solution without justification, and do not change product licensing or distribute unapproved code. Proceed through the implementation issues one tested PR at a time, always reporting commands/results and any owner decision needed.

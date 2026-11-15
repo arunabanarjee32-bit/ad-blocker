@@ -2,6 +2,8 @@
 
 **Core rule:** Do not spend Codex credits rebuilding existing functionality **or** combine source just because it is available. Every proposed import must pass security, legal, maintenance, compatibility and measurable-value checks.
 
+The [preliminary pinned foundation audit](FOUNDATION_AUDIT.md) now evaluates selected public foundations and current development-only dependencies. It is **not** approval to import upstream code or third-party filter data. The complete [18-repository catalog](OPEN_SOURCE_REFERENCE_REPOS.txt) remains the master study list.
+
 ## Candidate project inventory (not yet approved dependencies)
 
 | Project | Public repository | Potential role | License to verify at pinned commit | Proposed decision |

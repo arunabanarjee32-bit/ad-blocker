@@ -20,8 +20,14 @@ jobs:
           node-version: "22"
       - name: Install pinned test dependencies
         run: npm ci --no-audit --no-fund
-      - name: Verify lockfile remains unchanged
+      - name: Verify dependency installation preserves the lockfile
         run: git diff --exit-code -- package-lock.json
+      - name: Generate dependency SBOM using npm
+        run: |
+          mkdir -p build
+          npm sbom --sbom-format cyclonedx > build/dependency-sbom.json
+      - name: Audit installed dependencies
+        run: npm audit --audit-level=high
       - name: Run static checks and unit tests
         run: npm run check
       - name: Build unpacked Chrome extension
@@ -37,3 +43,10 @@ jobs:
           name: ad-blocker-chrome-unpacked
           path: dist/chrome/
           if-no-files-found: error
+      - name: Save dependency SBOM
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ad-blocker-dependency-sbom
+          path: build/dependency-sbom.json
+          if-no-files-found: warn
