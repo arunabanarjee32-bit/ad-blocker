@@ -20,6 +20,8 @@ The issue links below intentionally point to the original requirement scopes. Im
 
 ## Complete work in this order
 
+Current status: [foundation audit](FOUNDATION_AUDIT.md) has pinned preliminary findings and automated dependency controls. Original issue #2 remains blocked on owner distribution/license direction and full candidate validation. Issues are disabled in this fork (HTTP 410), so do not assume local issue creation succeeded. Original security issue #5 is independently eligible after the merged foundation; imports/compilers remain gated.
+
 | Order | Issue | Dependency | Deliverable |
 |---|---|---|---|
 | 03 | [#2](https://github.com/rejoansardar23/ad-blocker/issues/2) | Owner must select license and distribution approach | Pinned foundation + dependency + license audit and ADR; no copied unapproved code |
