@@ -1,5 +1,7 @@
 # Coding agent instructions (Codex Cloud / GPT-6 Astra)
 
+**Permanent cross-chat handoff:** Read [MASTER_PROJECT_HANDOFF](docs/MASTER_PROJECT_HANDOFF.md) and [RESEARCH_AND_CHAT_HISTORY_ARCHIVE](docs/RESEARCH_AND_CHAT_HISTORY_ARCHIVE.md) before continuing an existing project task. These are dated records: verify live main/PR/issue/CI state before relying on snapshots. For a reusable new-chat request, see [NEXT_CHAT_START.txt](docs/NEXT_CHAT_START.txt). Never pretend unavailable chats were exported verbatim.
+
 **Read first:** [README](README.md), [START_HERE](docs/START_HERE.md), [IMPLEMENTATION_CHECKLIST](docs/IMPLEMENTATION_CHECKLIST.md), [ARCHITECTURE](docs/ARCHITECTURE.md), [DECISIONS](docs/DECISIONS.md).
 
 This repo contains a **minimal original Chrome MV3 implementation**, Node check/build scripts, unit tests and a comprehensive aspirational roadmap. It has passed synthetic Chromium fixture tests; it is **not** a finished or broadly browser-validated product. Inspect repository state before claiming a feature exists.
