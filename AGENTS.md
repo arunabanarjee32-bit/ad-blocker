@@ -2,7 +2,7 @@
 
 **Read first:** [README](README.md), [START_HERE](docs/START_HERE.md), [IMPLEMENTATION_CHECKLIST](docs/IMPLEMENTATION_CHECKLIST.md), [ARCHITECTURE](docs/ARCHITECTURE.md), [DECISIONS](docs/DECISIONS.md).
 
-This repo contains a **minimal original Chrome MV3 implementation**, Node check/build scripts, unit tests and a comprehensive aspirational roadmap. It is **not** a finished, Chrome-browser-validated product. Inspect repository state before claiming a feature exists.
+This repo contains a **minimal original Chrome MV3 implementation**, Node check/build scripts, unit tests and a comprehensive aspirational roadmap. It has passed synthetic Chromium fixture tests; it is **not** a finished or broadly browser-validated product. Inspect repository state before claiming a feature exists.
 
 ## Your mission
 
@@ -32,11 +32,11 @@ Build a market-competitive, independently branded, privacy-first ad blocker star
 - `scripts/` and `tests/`: verification and build.
 - `.github/workflows/checks.yml`: automatic CI.
 
-## Exact first engineering task
+## Next engineering tasks
 
-Validate this first commit's code, fix any failures, and add **a genuine Chromium integration test** of the packaged extension. Include failed and passing test evidence. Make sure trusted-site exception priority works on Chrome navigation/reload, and global pause affects both network filtering and CSS.
+The initial Chromium baseline and rule/cosmetic safety changes are merged as upstream PRs #3 and #4 (and independently tested fork PRs #1/#2). Read [the execution queue](docs/PR_EXECUTION_QUEUE.md) and current feature evidence before choosing work. Run `npm ci` and the complete `npm run test:e2e` suite in a browser-capable environment in addition to the dependency-free Node checks. Some cloud environments block browser sockets or npm downloads; use the exact CI logs when local runs are unavailable, and clearly distinguish those results from local validation.
 
-Then finish the phase-0 licensing/foundation audit before importing third-party filtering engines or lists.
+Finish the phase-0 licensing/foundation audit before importing third-party filtering engines or lists. Settings consistency and security maintenance are independently eligible after the merged foundation; do not mark all security/accessibility gates done from unit tests alone.
 
 ## Done criteria
 

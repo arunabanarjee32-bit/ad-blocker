@@ -48,6 +48,11 @@
     busy = true;
     // Do not redraw the old saved checkbox state inside its change event:
     // restoring it synchronously makes a real user click appear to revert.
+    enabled.disabled = true;
+    siteInput.disabled = true;
+    form.querySelector("button").disabled = true;
+    for (const button of list.querySelectorAll("button")) button.disabled = true;
+    show("Saving…");
     try {
       state = await send(message);
       siteInput.value = "";

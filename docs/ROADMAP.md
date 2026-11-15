@@ -1,6 +1,6 @@
 # Incremental roadmap with exit criteria
 
-**Status:** roadmap as of 13 November 2026. A small original MV3 preview has been added and Node CI passes; licensing and real-browser verification remain open. Dates are not committed.
+**Status:** updated 15 November 2026. A small original MV3 preview and synthetic Chromium fixtures pass CI. Manual release validation, project licensing, wide-site benchmarking and independent security review remain open. Dates are not committed.
 
 ## Milestone 0 — ownership, reproducibility, foundation choice (must be first)
 
@@ -12,7 +12,7 @@
 - Verify licenses and dependencies, test the current Chrome build and document gaps/unsupported features.
 - Draft permission model, quality test plan and selected architecture.
 - Select ONE viable baseline; record ADR.
-- An original dependency-free MV3 preview and Node tests were implemented as an early baseline; compare it against candidate foundations before adopting external code. Chrome integration tests are still required.
+- An original dependency-free MV3 preview and Node tests were implemented as an early baseline; compare it against candidate foundations before adopting external code. Chromium fixture integration tests now pass; broader website and manual install tests remain required.
 
 **Exit:** reviewed audit, licensing decision, reproducible build, installable MV3 package, tested rule blocking + pause, documented next work. Until then no “MVP complete” claim.
 

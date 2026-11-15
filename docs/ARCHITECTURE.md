@@ -1,6 +1,6 @@
 # Architecture — original Chrome MV3 preview and future design
 
-**Updated 13 Nov 2026.** The first implementation is a small, dependency-free original-code proof of concept. It is **not browser-validated** yet. The future modular monorepo is a design proposal, not an existing package suite.
+**Updated 15 Nov 2026.** The first implementation is a small original-code proof of concept. It has passed synthetic Chromium browser tests in CI; broad real-world compatibility is **not** verified. The future modular monorepo is a design proposal, not an existing package suite.
 
 ## Current file structure
 
@@ -14,8 +14,8 @@ popup/                         # action popup UI
 options/                       # settings and trusted sites UI
 scripts/verify.mjs             # structural JSON + JS checks
 scripts/build.mjs              # dependency-free dist/chrome package
-tests/                         # Node domain + worker mock tests
-.github/workflows/checks.yml  # CI verification and build artifact
+tests/                         # Node domain/worker/UI tests and real Chromium fixtures
+.github/workflows/checks.yml  # CI: npm ci, tests, Chromium, dependency audit + SBOM
 docs/                          # product strategy and checklists
 ```
 
@@ -48,7 +48,7 @@ The current `normalizeSite` routine supports ordinary DNS hostnames from HTTP(S)
 - `storage`: local enabled/site list; no remote synchronization.
 - `activeTab`: current page's hostname in popup and optional reload.
 - Static `content_scripts` on HTTP(S) pages: required for minimal cosmetic CSS; broad site-access disclosures may apply.
-- No third-party runtime dependencies, remote scripts, analytics or server in this preview.
+- No third-party runtime dependencies, remote scripts, analytics or server in this preview. Playwright is a locked development-only dependency; GitHub Actions generates a dependency SBOM and high-severity advisory audit.
 
 There is no project-wide source license yet. Do not add third-party filtering code until auditing code/data licenses and distribution obligations.
 
