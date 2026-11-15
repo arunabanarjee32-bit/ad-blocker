@@ -1,5 +1,8 @@
 # Ad Blocker — Chrome MV3 Development Preview
 
+> **Lost the old ChatGPT chat? Start with [the permanent master project handoff](docs/MASTER_PROJECT_HANDOFF.md), [conversation/research archive](docs/RESEARCH_AND_CHAT_HISTORY_ARCHIVE.md), and [copy/paste prompt for a new agent](docs/NEXT_CHAT_START.txt).** These GitHub-native documents preserve the recoverable product vision, pinned external sources, architecture diagrams, CI evidence, PR history and next tasks; they are not a verbatim transcript export.
+
+
 > **Version 0.1.0 · Development preview · 15 November 2026**  
 > A small, original-code browser extension foundation now exists. **The synthetic Playwright Chromium MV3 test suite has passed, but broad real-world browser compatibility and production readiness are NOT verified.** Full AdGuard/uBlock/Ghostery feature parity is a long-term goal, not a current claim.
 
